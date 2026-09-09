@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a1030"/>
+      <stop offset="100%" stop-color="#05070f"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5cf0ff"/>
+      <stop offset="55%" stop-color="#2f8bff"/>
+      <stop offset="100%" stop-color="#7a4bff"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#5cf0ff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#5cf0ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="220" fill="url(#glow)" opacity="0.35"/>
+
+  <!-- Coiled snake body -->
+  <path d="M120 372 C60 300 96 196 176 176 C268 152 350 200 356 268 C362 336 296 388 232 372 C176 358 152 300 176 256"
+        fill="none" stroke="url(#body)" stroke-width="54" stroke-linecap="round" opacity="0.98"/>
+  <path d="M120 372 C60 300 96 196 176 176 C268 152 350 200 356 268 C362 336 296 388 232 372 C176 358 152 300 176 256"
+        fill="none" stroke="#dffaff" stroke-width="14" stroke-linecap="round" opacity="0.55"/>
+
+  <!-- Head -->
+  <circle cx="176" cy="256" r="42" fill="url(#body)"/>
+  <circle cx="164" cy="244" r="9" fill="#04121f"/>
+  <circle cx="192" cy="244" r="9" fill="#04121f"/>
+
+  <!-- Energy dot -->
+  <circle cx="388" cy="132" r="26" fill="#ffe680"/>
+  <circle cx="388" cy="132" r="44" fill="#ffe680" opacity="0.22"/>
+</svg>

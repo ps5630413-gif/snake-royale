@@ -1,0 +1,241 @@
+/* ==========================================================================
+   Snake Royale - HUD, minimap, leaderboard and on-screen touch controls
+   ========================================================================== */
+
+.hud {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;           /* only the buttons re-enable pointer events */
+  padding: calc(10px + var(--safe-t)) calc(10px + var(--safe-r)) calc(10px + var(--safe-b)) calc(10px + var(--safe-l));
+  display: flex;
+  flex-direction: column;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------- TOP ROW  */
+.hud__top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud__stat {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 10px;
+  border: 1px solid var(--c-border);
+  border-radius: 14px;
+  background: rgba(8, 13, 30, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.hud__label {
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  color: var(--c-text-dim);
+  font-weight: 800;
+}
+.hud__value {
+  font-family: var(--font-display);
+  font-size: 1.28rem;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: #fff;
+  text-shadow: 0 0 14px rgba(53, 230, 255, 0.35);
+}
+.hud__stat--coins .hud__value { color: var(--c-gold); text-shadow: 0 0 14px rgba(255, 210, 87, 0.45); }
+.hud__stat--length .hud__value { color: var(--c-green); text-shadow: 0 0 14px rgba(77, 255, 168, 0.35); }
+
+/* Coin pickup pulse */
+.hud__stat--coins.is-bump { animation: bump 0.28s ease; }
+@keyframes bump { 0% { transform: scale(1); } 45% { transform: scale(1.13); } 100% { transform: scale(1); } }
+
+/* ------------------------------------------------------------- SIDE PANEL */
+.hud__side {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding-top: 10px;
+  min-height: 0;
+}
+
+.leaderboard {
+  width: 132px;
+  padding: 8px 10px;
+  border: 1px solid var(--c-border);
+  border-radius: 14px;
+  background: rgba(8, 13, 30, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.leaderboard__title {
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  color: var(--c-text-dim);
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.leaderboard__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.72rem;
+}
+.leaderboard__list li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--c-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.leaderboard__list li .dot {
+  width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto;
+  box-shadow: 0 0 8px currentColor;
+  background: currentColor;
+}
+.leaderboard__list li .nm { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; }
+.leaderboard__list li .ln { font-weight: 800; color: #fff; }
+.leaderboard__list li.is-player { color: #fff; }
+
+/* ---------------------------------------------------------- BOTTOM ROW     */
+.hud__bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.minimap-wrap { position: relative; }
+.minimap {
+  width: 92px;
+  height: 92px;
+  display: block;
+  border: 1px solid var(--c-border);
+  border-radius: 14px;
+  background: rgba(4, 8, 20, 0.62);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.minimap__label {
+  position: absolute;
+  top: 4px; left: 8px;
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  font-weight: 800;
+  color: var(--c-text-dim);
+}
+
+.boost-wrap { flex: 1 1 auto; max-width: 46%; }
+.boost-bar {
+  height: 12px;
+  border: 1px solid var(--c-border);
+  border-radius: 999px;
+  background: rgba(8, 13, 30, 0.6);
+  overflow: hidden;
+}
+.boost-bar__fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #35e6ff, #7b5cff);
+  box-shadow: 0 0 16px rgba(53, 230, 255, 0.6);
+  transform-origin: left center;
+  transition: width 0.12s linear, background 0.2s ease;
+}
+.boost-bar__fill.is-low { background: linear-gradient(90deg, #ff5a7a, #ff8a2b); }
+.boost-bar__label {
+  display: block;
+  margin-top: 4px;
+  text-align: right;
+  font-size: 0.55rem;
+  letter-spacing: 0.18em;
+  font-weight: 800;
+  color: var(--c-text-dim);
+}
+
+/* ==========================================================================
+   Virtual joystick
+   ========================================================================== */
+.joystick {
+  position: absolute;
+  left: calc(20px + var(--safe-l));
+  bottom: calc(26px + var(--safe-b));
+  z-index: 30;
+  touch-action: none;
+  pointer-events: auto;
+}
+.joystick__base {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, rgba(30, 45, 90, 0.55), rgba(10, 16, 34, 0.42) 70%, rgba(10, 16, 34, 0.15));
+  border: 1.5px solid rgba(120, 190, 255, 0.28);
+  box-shadow: inset 0 0 30px rgba(53, 230, 255, 0.12), 0 10px 30px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  touch-action: none;
+}
+.joystick__ring {
+  position: absolute;
+  inset: 26px;
+  border-radius: 50%;
+  border: 1px dashed rgba(120, 190, 255, 0.25);
+}
+.joystick__arrows { position: absolute; inset: 0; width: 100%; height: 100%; fill: rgba(160, 205, 255, 0.28); }
+.joystick__knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #a8f4ff, #2f8bff 55%, #1b4fd0);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 22px rgba(53, 230, 255, 0.55), 0 6px 16px rgba(0, 0, 0, 0.45);
+  will-change: transform;
+}
+.joystick.is-active .joystick__base { border-color: rgba(53, 230, 255, 0.6); }
+
+/* ==========================================================================
+   Boost button
+   ========================================================================== */
+.boost-btn {
+  position: absolute;
+  right: calc(20px + var(--safe-r));
+  bottom: calc(30px + var(--safe-b));
+  z-index: 30;
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: radial-gradient(circle at 35% 30%, #7b5cff, #3a1fa8 60%, #241066);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 30px rgba(123, 92, 255, 0.45), 0 10px 26px rgba(0, 0, 0, 0.45);
+  touch-action: none;
+  transition: transform 0.08s ease, filter 0.12s ease;
+}
+.boost-btn.is-down { transform: scale(0.92); filter: brightness(1.3); }
+.boost-btn.is-empty { opacity: 0.4; }
+
+@media (orientation: landscape) and (max-height: 480px) {
+  .joystick__base { width: 108px; height: 108px; }
+  .joystick__knob { width: 48px; height: 48px; margin: -24px 0 0 -24px; }
+  .boost-btn { width: 84px; height: 84px; font-size: 0.8rem; }
+  .minimap { width: 74px; height: 74px; }
+}

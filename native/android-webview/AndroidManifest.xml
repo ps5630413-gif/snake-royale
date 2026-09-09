@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Snake Royale - AndroidManifest.xml for the bare WebView template.
+  Copy to: app/src/main/AndroidManifest.xml
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      INTERNET + ACCESS_NETWORK_STATE are required by Google Mobile Ads
+      (AdMob). Keep them even before you add the plugin - the game itself
+      never talks to the network.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Optional: keep the screen awake during long runs -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- The game does not need a camera, microphone or location -->
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="Snake Royale"
+        android:theme="@style/Theme.SnakeRoyale"
+        android:hardwareAccelerated="true"
+        android:usesCleartextTraffic="false"
+        android:supportsRtl="false">
+
+        <!--
+          AdMob: replace the value below with YOUR app id from the AdMob
+          dashboard (it looks like ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY).
+          Missing or wrong meta-data makes the Mobile Ads SDK crash on start.
+        -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="Snake Royale"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|smallestScreenSize|uiMode|density"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:hardwareAccelerated="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
