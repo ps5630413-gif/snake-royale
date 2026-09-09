@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Snake Royale theme: dark, full screen, no action bar.
+     Copy to: app/src/main/res/values/themes.xml -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.SnakeRoyale" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:statusBarColor" tools:targetApi="l">@android:color/black</item>
+        <item name="android:navigationBarColor" tools:targetApi="l">@android:color/black</item>
+        <item name="android:windowTranslucentStatus" tools:targetApi="kitkat">false</item>
+        <item name="colorPrimary">#35e6ff</item>
+        <item name="colorPrimaryDark">#05070f</item>
+        <item name="colorAccent">#7b5cff</item>
+    </style>
+
+</resources>

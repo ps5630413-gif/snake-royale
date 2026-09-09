@@ -1,0 +1,36 @@
+{
+  "name": "snake-royale",
+  "version": "1.0.0",
+  "description": "Snake Royale - a mobile-first HTML5 battle royale snake game, ready to be packaged as a native Android app with Capacitor or Cordova.",
+  "private": true,
+  "scripts": {
+    "serve": "node tools/serve.js",
+    "test": "node tools/smoke-test.js",
+    "test:render": "node tools/render-test.js",
+    "test:dom": "node tools/dom-test.js",
+    "test:all": "node tools/smoke-test.js && node tools/render-test.js && node tools/dom-test.js",
+    "cap:init": "cap init SnakeRoyale com.snakeroyale.app --web-dir=www",
+    "cap:sync": "npm run build:noop && cap sync",
+    "cap:android": "cap sync android && cap open android",
+    "build:noop": "node -e \"console.log('No bundler required - www/ is served as-is')\"",
+    "cordova:prepare": "cordova prepare android"
+  },
+  "keywords": [
+    "snake",
+    "game",
+    "html5",
+    "canvas",
+    "capacitor",
+    "cordova",
+    "android",
+    "admob"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/core": "^6.0.0"
+  }
+}

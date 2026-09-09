@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Snake Royale</title>
+
+  <!--
+    Mobile web-view tuning:
+      * viewport-fit=cover  -> use the whole display (incl. notch area)
+      * user-scalable=no   -> no accidental pinch zoom while playing
+      * viewport height is fixed by the CSS (100dvh) so browser UI bars
+        never resize the canvas mid-game.
+  -->
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#05070f" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Snake Royale" />
+  <meta name="description" content="Snake Royale - a fast, neon battle-royale snake game for Android." />
+
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg" />
+  <link rel="apple-touch-icon" href="assets/icon.svg" />
+
+  <!-- Stylesheets: base -> hud -> screens -> shop (cascade order matters) -->
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/hud.css" />
+  <link rel="stylesheet" href="css/screens.css" />
+  <link rel="stylesheet" href="css/shop.css" />
+</head>
+
+<body>
+  <div id="app" class="app">
+
+    <!-- ================================================================= -->
+    <!-- GAME SURFACE                                                       -->
+    <!-- ================================================================= -->
+    <canvas id="game-canvas" class="game-canvas"></canvas>
+
+    <!-- ================================================================= -->
+    <!-- IN-GAME HUD (score, minimap, leaderboard, buttons)                 -->
+    <!-- ================================================================= -->
+    <div id="hud" class="hud is-hidden">
+      <div class="hud__top">
+        <div class="hud__stat hud__stat--score">
+          <span class="hud__label">SCORE</span>
+          <span id="hud-score" class="hud__value">0</span>
+        </div>
+        <div class="hud__stat hud__stat--length">
+          <span class="hud__label">LENGTH</span>
+          <span id="hud-length" class="hud__value">0</span>
+        </div>
+        <div class="hud__stat hud__stat--coins">
+          <span class="hud__label">COINS</span>
+          <span id="hud-coins" class="hud__value">0</span>
+        </div>
+        <button id="btn-pause" class="icon-btn" type="button" aria-label="Pause">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>
+        </button>
+      </div>
+
+      <div class="hud__side">
+        <div id="leaderboard" class="leaderboard">
+          <div class="leaderboard__title">ARENA</div>
+          <ol id="leaderboard-list" class="leaderboard__list"></ol>
+        </div>
+      </div>
+
+      <div class="hud__bottom">
+        <div class="minimap-wrap">
+          <canvas id="minimap" class="minimap" width="180" height="180"></canvas>
+          <span class="minimap__label">MAP</span>
+        </div>
+        <div class="boost-wrap">
+          <div class="boost-bar"><div id="boost-fill" class="boost-bar__fill"></div></div>
+          <span class="boost-bar__label">MASS</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TOUCH CONTROLS (virtual joystick + boost)                          -->
+    <!-- ================================================================= -->
+    <div id="joystick" class="joystick is-hidden" aria-hidden="true">
+      <div class="joystick__base">
+        <div class="joystick__ring"></div>
+        <div id="joystick-knob" class="joystick__knob"></div>
+        <svg class="joystick__arrows" viewBox="0 0 100 100" aria-hidden="true">
+          <path d="M50 12 L60 28 L40 28 Z" /><path d="M50 88 L60 72 L40 72 Z" />
+          <path d="M12 50 L28 40 L28 60 Z" /><path d="M88 50 L72 40 L72 60 Z" />
+        </svg>
+      </div>
+    </div>
+
+    <button id="boost-btn" class="boost-btn is-hidden" type="button">BOOST</button>
+
+    <!-- ================================================================= -->
+    <!-- SCREEN: LOADING                                                    -->
+    <!-- ================================================================= -->
+    <section id="screen-loading" class="screen screen--loading is-active">
+      <div class="loader">
+        <div class="loader__snake"><span></span><span></span><span></span><span></span><span></span></div>
+        <h1 class="loader__title">SNAKE<span>ROYALE</span></h1>
+        <p id="loading-text" class="loader__text">Loading arena…</p>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- SCREEN: MAIN MENU                                                  -->
+    <!-- ================================================================= -->
+    <section id="screen-menu" class="screen screen--menu">
+      <div class="menu">
+        <div class="menu__brand">
+          <h1 class="logo">SNAKE<span>ROYALE</span></h1>
+          <p class="logo__tag">Slither. Grow. Survive.</p>
+        </div>
+
+        <div class="menu__stats">
+          <div class="pill pill--best">
+            <span class="pill__label">BEST</span>
+            <span id="menu-best" class="pill__value">0</span>
+          </div>
+          <div class="pill pill--coins">
+            <span class="pill__label">COINS</span>
+            <span id="menu-coins" class="pill__value">0</span>
+          </div>
+        </div>
+
+        <div class="menu__actions">
+          <button id="btn-play" class="btn btn--primary" type="button">PLAY</button>
+          <button id="btn-shop" class="btn btn--secondary" type="button">SKINS SHOP</button>
+          <button id="btn-howto" class="btn btn--ghost" type="button">HOW TO PLAY</button>
+          <button id="btn-settings" class="btn btn--ghost" type="button">SETTINGS</button>
+        </div>
+
+        <p class="menu__foot">v<span id="menu-version">1.0.0</span> · made with HTML5 Canvas</p>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- SCREEN: SKINS SHOP                                                 -->
+    <!-- ================================================================= -->
+    <section id="screen-shop" class="screen screen--shop">
+      <header class="screen__head">
+        <button class="icon-btn icon-btn--back" data-back type="button" aria-label="Back">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 L8 12 L15 19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h2 class="screen__title">SKINS SHOP</h2>
+        <div class="wallet"><span class="wallet__icon">◉</span><span id="shop-coins">0</span></div>
+      </header>
+
+      <div id="shop-grid" class="shop-grid"><!-- injected by js/ui/shop.js --></div>
+
+      <footer class="shop__foot">
+        <p>Collect golden coins on the map to unlock new skins.</p>
+      </footer>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- SCREEN: HOW TO PLAY                                                -->
+    <!-- ================================================================= -->
+    <section id="screen-howto" class="screen screen--howto">
+      <header class="screen__head">
+        <button class="icon-btn icon-btn--back" data-back type="button" aria-label="Back">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 L8 12 L15 19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h2 class="screen__title">HOW TO PLAY</h2>
+        <div class="wallet"></div>
+      </header>
+
+      <div class="panel panel--scroll">
+        <ul class="tips">
+          <li><b>Move</b> — drag the virtual joystick, or swipe anywhere on screen.</li>
+          <li><b>Boost</b> — hold the BOOST button (costs mass, so stay fed).</li>
+          <li><b>Grow</b> — eat glowing energy dots and the remains of dead snakes.</li>
+          <li><b>Coins</b> — grab golden coins to spend in the Skins Shop.</li>
+          <li><b>Permadeath</b> — touching another snake's body or the arena wall kills you instantly.</li>
+          <li><b>Trap</b> — bigger bots will try to cut you off. Circle them and let them crash into you.</li>
+          <li><b>Revive</b> — after dying you can watch one rewarded video to continue with your score.</li>
+        </ul>
+        <p class="muted">Keyboard (desktop testing): arrows / WASD to steer, SPACE to boost, ESC to pause.</p>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- SCREEN: SETTINGS                                                   -->
+    <!-- ================================================================= -->
+    <section id="screen-settings" class="screen screen--settings">
+      <header class="screen__head">
+        <button class="icon-btn icon-btn--back" data-back type="button" aria-label="Back">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 L8 12 L15 19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h2 class="screen__title">SETTINGS</h2>
+        <div class="wallet"></div>
+      </header>
+
+      <div class="panel panel--scroll">
+        <div class="setting">
+          <span class="setting__label">Controls</span>
+          <div class="segmented" id="set-controls">
+            <button data-value="joystick" type="button">Joystick</button>
+            <button data-value="touch" type="button">Swipe</button>
+            <button data-value="both" type="button">Both</button>
+          </div>
+        </div>
+        <p class="setting__hint">Joystick: fixed pad, bottom-left. Swipe: drag anywhere. Both: pad + free drag.</p>
+
+        <div class="setting">
+          <span class="setting__label">Sound effects</span>
+          <button id="set-sound" class="toggle" type="button" role="switch" aria-checked="true"><span></span></button>
+        </div>
+
+        <div class="setting">
+          <span class="setting__label">Glow &amp; particles</span>
+          <button id="set-fx" class="toggle" type="button" role="switch" aria-checked="true"><span></span></button>
+        </div>
+
+        <div class="setting">
+          <span class="setting__label">Show grid</span>
+          <button id="set-grid" class="toggle" type="button" role="switch" aria-checked="true"><span></span></button>
+        </div>
+
+        <hr class="rule" />
+
+        <button id="btn-reset" class="btn btn--danger" type="button">RESET PROGRESS</button>
+        <p class="muted">Clears high score, coins and unlocked skins stored on this device.</p>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- SCREEN: PAUSE                                                      -->
+    <!-- ================================================================= -->
+    <section id="screen-pause" class="screen screen--pause">
+      <div class="panel panel--center">
+        <h2 class="panel__title">PAUSED</h2>
+        <button id="btn-resume" class="btn btn--primary" type="button">RESUME</button>
+        <button id="btn-quit" class="btn btn--ghost" type="button">QUIT TO MENU</button>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- SCREEN: GAME OVER                                                  -->
+    <!-- ================================================================= -->
+    <section id="screen-gameover" class="screen screen--gameover">
+      <div class="panel panel--center gameover">
+        <p id="go-cause" class="gameover__cause">You crashed into Rattler</p>
+        <h2 class="gameover__title">GAME OVER</h2>
+
+        <div class="gameover__score">
+          <div class="gameover__score-main">
+            <span class="gameover__score-label">SCORE</span>
+            <span id="go-score" class="gameover__score-value">0</span>
+          </div>
+          <div class="gameover__meta">
+            <span>BEST <b id="go-best">0</b></span>
+            <span>LENGTH <b id="go-length">0</b></span>
+            <span>KILLS <b id="go-kills">0</b></span>
+          </div>
+          <div id="go-newbest" class="gameover__newbest is-hidden">NEW PERSONAL BEST!</div>
+        </div>
+
+        <div class="reward-row">
+          <span class="reward-row__coins">+<b id="go-coins">0</b> coins</span>
+          <span class="reward-row__note">collected this run</span>
+        </div>
+
+        <button id="btn-revive" class="btn btn--revive" type="button">
+          <span class="btn__icon">▶</span>
+          <span class="btn__text">REVIVE — WATCH AD</span>
+          <span class="btn__sub">1 free continue per run</span>
+        </button>
+
+        <button id="btn-again" class="btn btn--primary" type="button">PLAY AGAIN</button>
+        <button id="btn-home" class="btn btn--ghost" type="button">MAIN MENU</button>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- SCREEN: SIMULATED REWARDED VIDEO (AdMob placeholder)               -->
+    <!-- ================================================================= -->
+    <section id="screen-ad" class="screen screen--ad">
+      <div class="ad">
+        <div class="ad__video">
+          <div class="ad__scene"><div class="ad__orb"></div><div class="ad__grid"></div></div>
+          <div class="ad__badge">AD</div>
+          <div class="ad__timer" id="ad-timer">30</div>
+          <button id="ad-close" class="ad__close is-hidden" type="button" aria-label="Close advertisement">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6 L18 18 M18 6 L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+          </button>
+          <div class="ad__progress"><div id="ad-progress-fill" class="ad__progress-fill"></div></div>
+        </div>
+        <div class="ad__caption">
+          <span id="ad-title">Rewarded video (simulated)</span>
+          <span class="ad__hint">Real AdMob ads load here once the plugin is installed.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Transient toast messages (kills, purchases, errors) -->
+    <div id="toast" class="toast"></div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- SCRIPTS - plain classic scripts (no bundler) so the game also works  -->
+  <!-- from file:// inside a WebView. Load order = dependency order.        -->
+  <!-- =================================================================== -->
+  <!-- 1. Core ----------------------------------------------------------- -->
+  <script src="js/core/config.js"></script>
+  <script src="js/core/utils.js"></script>
+  <script src="js/core/events.js"></script>
+  <script src="js/core/storage.js"></script>
+
+  <!-- 2. Data ----------------------------------------------------------- -->
+  <script src="js/data/skins.js"></script>
+  <script src="js/data/botNames.js"></script>
+
+  <!-- 3. World & entities ----------------------------------------------- -->
+  <script src="js/world/spatialHash.js"></script>
+  <script src="js/entities/food.js"></script>
+  <script src="js/entities/snake.js"></script>
+  <script src="js/entities/particles.js"></script>
+  <script src="js/world/world.js"></script>
+
+  <!-- 4. AI ------------------------------------------------------------- -->
+  <script src="js/ai/botBrain.js"></script>
+
+  <!-- 5. Input ---------------------------------------------------------- -->
+  <script src="js/input/inputManager.js"></script>
+
+  <!-- 6. Rendering ------------------------------------------------------ -->
+  <script src="js/render/camera.js"></script>
+  <script src="js/render/sprites.js"></script>
+  <script src="js/render/renderer.js"></script>
+
+  <!-- 7. Monetization --------------------------------------------------- -->
+  <script src="js/ads/adManager.js"></script>
+
+  <!-- 8. Audio ---------------------------------------------------------- -->
+  <script src="js/audio/sfx.js"></script>
+
+  <!-- 9. UI ------------------------------------------------------------- -->
+  <script src="js/ui/screens.js"></script>
+  <script src="js/ui/hud.js"></script>
+  <script src="js/ui/shop.js"></script>
+
+  <!-- 10. Game orchestration -------------------------------------------- -->
+  <script src="js/game/game.js"></script>
+
+  <!-- 11. Bootstrap ----------------------------------------------------- -->
+  <script src="js/main.js"></script>
+</body>
+</html>

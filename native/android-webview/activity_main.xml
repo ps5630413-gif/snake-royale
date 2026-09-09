@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Layout of the Snake Royale host activity: a single, full screen WebView. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#05070f"
+    android:keepScreenOn="true">
+
+    <WebView
+        android:id="@+id/game_webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#05070f"
+        android:scrollbars="none"
+        android:overScrollMode="never"
+        android:fitsSystemWindows="false" />
+
+</FrameLayout>

@@ -1,0 +1,46 @@
+/*
+ * Snake Royale - app module build.gradle for the bare WebView template.
+ * Copy to: app/build.gradle   (keep your own namespace / package name)
+ */
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.snakeroyale.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.snakeroyale.app'
+        minSdk 22              // Android 5.1+ (Capacitor 6 also requires 22+)
+        targetSdk 34
+        versionCode 1
+        versionName '1.0.0'
+
+        // Set from the wizard: File > Project Structure > Modules > Properties
+        // Keep it commented out so the wizard can inject defaults.
+        // testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    // assets/www is picked up automatically - no extra config needed
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+
+    /* AdMob / Google Mobile Ads (uncomment when you wire real ads natively)
+       implementation 'com.google.android.gms:play-services-ads:22.6.0'
+    */
+}
